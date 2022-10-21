@@ -28,12 +28,14 @@ const SocketView:React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.addressInputContainer}>
+
         <TextInput 
           style={styles.addressInput}
           placeholder="ws://0.0.0.0:1609"
           onChangeText={setSocketEndpoint}
           value={socketEndpoint}
         />
+
       </View>
 
       <TouchableOpacity
@@ -41,8 +43,18 @@ const SocketView:React.FC = () => {
         onPress={() => connectToServer()}
       />
 
-      <TouchableOpacity style={styles.mouseControls} onPress={() => sendDirection("cima")}/>
-      <TouchableOpacity style={styles.mouseControls} onPress={() => sendDirection("baixo")}/>
+      <View style={{alignItems: "center"}}>
+      
+        <View><TouchableOpacity style={styles.mouseControls} onPress={() => sendDirection("top")}/></View>
+        
+        <View style={{flexDirection: "row"}}>
+          <TouchableOpacity style={styles.mouseControls} onPress={() => sendDirection("left")}/>
+          <TouchableOpacity style={styles.mouseControls} onPress={() => sendDirection("right")}/>
+        </View>
+        
+        <View><TouchableOpacity style={styles.mouseControls} onPress={() => sendDirection("bottom")}/></View>
+      
+      </View>
     </View>
   );
 }
