@@ -1,30 +1,20 @@
-import React, {useState} from "react"
-import {StyleSheet, View, TouchableOpacity, TextInput} from "react-native"
+import React, {useEffect, useState} from "react"
+import {StyleSheet, View, TouchableOpacity, TextInput, Text} from "react-native"
 
-import { io, Socket } from "socket.io-client";
+import { useSocketClient, getGyroscope } from "./hooks"
 
 const SocketView:React.FC = () => {
   const [socketEndpoint, setSocketEndpoint] = useState("ws://192.168.1.70:1609")
-  const [socketInstance, setSocketInstance] = useState<Socket|undefined>()
+  const { socketInstance, connectToServer, sendDirection } = useSocketClient(socketEndpoint)
+  const { x, y, z } = getGyroscope()
 
-  const connectToServer = () => {
-    if (!socketInstance)
-    {
-      setSocketInstance(io(socketEndpoint))
-    }
-    else
-    {
-      socketInstance.close()
-      setSocketInstance(undefined)
-    }
-  }
-
-  const sendDirection = (direction: string) => {
-    if (!!socketInstance) {
-      socketInstance.emit("direction", direction)
-    }
-  }
-
+  useEffect(() => {
+    if (x < -0.1) sendDirection("bottom")
+    else if (x > 0.1) sendDirection("top")
+    if (z < -0.1) sendDirection("right")
+    else if (z > 0.1) sendDirection("left")
+  }, [x,y,z])
+  
   return (
     <View style={styles.container}>
       <View style={styles.addressInputContainer}>
@@ -37,6 +27,10 @@ const SocketView:React.FC = () => {
         />
 
       </View>
+
+      {/* <View>
+        <Text>{JSON.stringify({ x, y, z })}</Text>
+      </View> */}
 
       <TouchableOpacity
         style={[styles.mouseControls, {backgroundColor: !!socketInstance ? "green" : "red"}]}
