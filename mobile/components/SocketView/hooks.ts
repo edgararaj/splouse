@@ -45,9 +45,7 @@ export const useSocketClient = (socketEndpoint: string) => {
   }
 
   const sendDirection: sendDirectionType = useCallback(gyroscopeData => {
-    console.log("eu tou aqui 1")
     if (!!socketInstance) {
-      console.log({socketInstance})
       socketInstance.emit("direction", gyroscopeData)
     }
   }, [socketInstance])

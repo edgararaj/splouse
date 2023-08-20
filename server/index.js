@@ -7,33 +7,11 @@ console.log("Server Started")
 
 io.on("connection", (socket) => {
   console.log("Connected")
-  socket.on("direction", (direction) => {
-    console.log(direction)
+  socket.on("direction", ({x, _, z}) => {
+    console.log({x, z})
 
     const {x: currentX, y: currentY} = robot.getMousePos();
-
-    console.log(currentX, currentY)
-
-    switch (direction) {
-      case "top":
-          robot.moveMouse(currentX, currentY - 5);   
-        break;
-      
-      case "bottom":
-        robot.moveMouse(currentX, currentY + 5);  
-        break;
-
-      case "left":
-          robot.moveMouse(currentX - 5, currentY);   
-        break;
-      
-      case "right":
-        robot.moveMouse(currentX + 5, currentY);  
-        break;
-    
-      default:
-        break;
-    }
+    robot.moveMouse(currentX - (z * 10), currentY - (x * 10))
   });
 
   socket.on("disconnect", (reason) => {
