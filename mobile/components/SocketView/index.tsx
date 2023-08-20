@@ -4,7 +4,7 @@ import {StyleSheet, View, TouchableOpacity, TextInput, Text} from "react-native"
 import { useSocketClient, useGyroscope } from "./hooks"
 
 const SocketView:React.FC = () => {
-  const [socketEndpoint, setSocketEndpoint] = useState("ws://192.168.1.93:1609")
+  const [socketEndpoint, setSocketEndpoint] = useState("192.168.1.93")
   const { socketInstance, connectToServer, sendDirection, sendAction } = useSocketClient(socketEndpoint)
   useGyroscope(sendDirection)
   

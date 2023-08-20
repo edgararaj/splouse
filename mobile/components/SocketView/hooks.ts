@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { Gyroscope, GyroscopeMeasurement } from 'expo-sensors';
 
-import { io, Socket } from "socket.io-client";
+import dgram from 'react-native-udp'
 
 type sendDirectionType = (gyroscopeData: GyroscopeMeasurement) => void
 type sendActionType = (action: "center" | "left-click" | "middle-click" | "right-click") => void
@@ -31,12 +31,14 @@ export const useGyroscope = (sendDirection: sendDirectionType) => {
 }
 
 export const useSocketClient = (socketEndpoint: string) => {
-  const [socketInstance, setSocketInstance] = useState<Socket|undefined>(undefined)
+  const [socketInstance, setSocketInstance] = useState(undefined)
 
   const connectToServer = () => {
     if (!socketInstance)
     {
-      setSocketInstance(io(socketEndpoint))
+      const socket = dgram.createSocket('udp4')
+      socket.bind(1609)
+      setSocketInstance(socket)
     }
     else
     {
@@ -47,13 +49,15 @@ export const useSocketClient = (socketEndpoint: string) => {
 
   const sendDirection: sendDirectionType = useCallback(gyroscopeData => {
     if (!!socketInstance) {
-      socketInstance.emit("direction", gyroscopeData)
+      // socketInstance.emit("direction", gyroscopeData)
+      socketInstance.send('direction', undefined, undefined, 1609, socketEndpoint, err => console.warn)
     }
   }, [socketInstance])
 
-  const sendAction: sendActionType = useCallback((action) => {
+  const sendAction: sendActionType = useCallback(action => {
     if (!!socketInstance) {
-      socketInstance.emit("action", action)
+      // socketInstance.emit("action", action)
+      socketInstance.send('action', undefined, undefined, 1609, socketEndpoint, err => console.warn)
     }
   }, [socketInstance])
 
