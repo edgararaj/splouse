@@ -47,17 +47,15 @@ export const useSocketClient = (socketEndpoint: string) => {
     }
   }
 
-  const sendDirection: sendDirectionType = useCallback(gyroscopeData => {
+  const sendDirection: sendDirectionType = useCallback(({x, z}) => {
     if (!!socketInstance) {
-      // socketInstance.emit("direction", gyroscopeData)
-      socketInstance.send('direction', undefined, undefined, 1609, socketEndpoint, err => console.warn)
+      socketInstance.send(`direction|${x}|${z}`, undefined, undefined, 1609, socketEndpoint)
     }
   }, [socketInstance])
 
   const sendAction: sendActionType = useCallback(action => {
     if (!!socketInstance) {
-      // socketInstance.emit("action", action)
-      socketInstance.send('action', undefined, undefined, 1609, socketEndpoint, err => console.warn)
+      socketInstance.send(`action|${action}`, undefined, undefined, 1609, socketEndpoint)
     }
   }, [socketInstance])
 

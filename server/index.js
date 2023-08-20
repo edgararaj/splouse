@@ -21,6 +21,24 @@ server.on('error', (err) => {
   server.close();
 });
 
+server.on('message', (msg, rinfo) => {
+  const resString = msg.toString()
+  const [type, ...params] = resString !== "" ? resString.split("|") : ["unknown"]
+
+
+  console.log(`server got: ${type} from ${rinfo.address}:${rinfo.port}`);
+
+  switch (type) {
+    case "direction":
+      const [x, z] = params
+      handleDirection({x, z})
+      break;
+    case "action":
+      handleAction(params[0])
+      break;
+  }
+})
+
 const handleDirection = ({x, z}) => {
   console.log('Moving')
 
@@ -47,11 +65,5 @@ const handleAction = action => {
       break;
   }
 }
-
-server.on('message', (msg, rinfo) => {
-  console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-  console.log({msg, rinfo});
- 
-})
 
 server.bind(1609)
