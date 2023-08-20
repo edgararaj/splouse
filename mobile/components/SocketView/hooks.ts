@@ -5,6 +5,7 @@ import { Gyroscope, GyroscopeMeasurement } from 'expo-sensors';
 import { io, Socket } from "socket.io-client";
 
 type sendDirectionType = (gyroscopeData: GyroscopeMeasurement) => void
+type sendActionType = (action: "center" | "left-click" | "middle-click" | "right-click") => void
 
 // TODO: sendDirection is not updating the socketInstance value and is requesting even after connect been close
 
@@ -50,5 +51,11 @@ export const useSocketClient = (socketEndpoint: string) => {
     }
   }, [socketInstance])
 
-  return { socketInstance, connectToServer, sendDirection }
+  const sendAction: sendActionType = useCallback((action) => {
+    if (!!socketInstance) {
+      socketInstance.emit("action", action)
+    }
+  }, [socketInstance])
+
+  return { socketInstance, connectToServer, sendDirection, sendAction }
 }
