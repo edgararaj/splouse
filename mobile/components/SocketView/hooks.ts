@@ -1,21 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import {
-  Gyroscope, GyroscopeMeasurement,
-} from 'expo-sensors';
+import { Gyroscope, GyroscopeMeasurement } from 'expo-sensors';
 
 import { io, Socket } from "socket.io-client";
 
-interface GyroscopeType {
-  x: number
-  y: number
-  z: number
-} 
+type sendDirectionType = (gyroscopeData: GyroscopeMeasurement) => void
 
-type direction = "top" | "left" | "right" | "bottom" 
+// TODO: sendDirection is not updating the socketInstance value and is requesting even after connect been close
+
+export const useGyroscope = (sendDirection: sendDirectionType) => {
+  const [subscription, setSubscription] = useState(null);
+
+  const _subscribe = () => {
+    setSubscription(
+      Gyroscope.addListener(sendDirection)
+    );
+  };
+
+  const _unsubscribe = () => {
+    subscription && subscription.remove();
+    setSubscription(null);
+  };
+
+  useEffect(() => {
+    _subscribe();
+    Gyroscope.setUpdateInterval(16)
+    return () => _unsubscribe();
+  }, [sendDirection]);
+}
 
 export const useSocketClient = (socketEndpoint: string) => {
-  const [socketInstance, setSocketInstance] = useState<Socket|undefined>()
+  const [socketInstance, setSocketInstance] = useState<Socket|undefined>(undefined)
 
   const connectToServer = () => {
     if (!socketInstance)
@@ -29,42 +44,13 @@ export const useSocketClient = (socketEndpoint: string) => {
     }
   }
 
-  const sendDirection = (direction: direction) => {
+  const sendDirection: sendDirectionType = useCallback(gyroscopeData => {
+    console.log("eu tou aqui 1")
     if (!!socketInstance) {
-      socketInstance.emit("direction", direction)
+      console.log({socketInstance})
+      socketInstance.emit("direction", gyroscopeData)
     }
-  }
+  }, [socketInstance])
 
   return { socketInstance, connectToServer, sendDirection }
-}
-
-export const getGyroscope = (): GyroscopeType =>  {
-  const [{ x, y, z }, setData] = useState({
-    x: 0,
-    y: 0,
-    z: 0,
-  });
-  const [subscription, setSubscription] = useState(null);
-
-  const _slow = () => Gyroscope.setUpdateInterval(1000);
-  const _fast = () => Gyroscope.setUpdateInterval(16);
-
-  const _subscribe = () => {
-    setSubscription(
-      Gyroscope.addListener(setData)
-    );
-  };
-
-  const _unsubscribe = () => {
-    subscription && subscription.remove();
-    setSubscription(null);
-  };
-
-  useEffect(() => {
-    _subscribe();
-    _fast()
-    return () => _unsubscribe();
-  }, []);
-
-  return {x,y,z}
 }
